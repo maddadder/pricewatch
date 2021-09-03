@@ -16,5 +16,20 @@
     },
     "page_action": {
         "default_popup": "index.html"
-    }
+    },
+    "content_scripts": [
+        {
+          "matches": [
+            "https://www.safeway.com/*"
+          ],
+          "js": [
+            "content.js",
+            "runtime.js"
+          ],
+          "css": [
+            "styles.css"
+          ]
+        }
+    ],
+    "web_accessible_resources": ["index.html"]
 }

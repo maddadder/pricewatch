@@ -9,3 +9,5 @@ chrome.runtime.onInstalled.addListener(() => {
 	  });
 	}, { url: [{ urlMatches: 'www.safeway.com' }] });
 });
+
+chrome.runtime.getURL('index.html')
