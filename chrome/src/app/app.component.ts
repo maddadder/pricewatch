@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { Product } from '../models/Product';
-import { DictEntry } from '../models/DictEntry';
 
 @Component({
   selector: 'app-root',
@@ -38,11 +37,10 @@ export class AppComponent {
   public updatePage(g_itemLabels:any)
   {
     for (const key of Object.keys(g_itemLabels.table)) {
-      const obj = <DictEntry>g_itemLabels.table[key];
+      const obj = g_itemLabels.table[key];
       var p = new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit )
       this.Products.push(p);
     }
-    console.log(this.Products);
     this.cd.detectChanges();
   }
 }
