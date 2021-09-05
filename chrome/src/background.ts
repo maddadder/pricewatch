@@ -1,5 +1,24 @@
-chrome.storage.sync.set({ color: '#3aa757' });
-
+chrome.runtime.onMessage.addListener(
+	function(request, sender, sendResponse) {
+		if(sender.tab)
+		{
+			if(sender.tab.url?.startsWith("https://www.safeway.com/shop/search-results.html"))
+			{
+				console.log(sender.tab);
+				if (request.message === "initial_loading")
+				{
+					console.log("background received initial_loading");
+					chrome.storage.sync.set({g_itemLabels:request.g_itemLabels});
+					sendResponse({farewell: "goodbye"});
+				}
+			}
+		}
+		else
+		{
+			console.log(sender);
+		}
+	}
+);
 chrome.runtime.onInstalled.addListener(() => {
 	chrome.webNavigation.onCompleted.addListener(() => {
 	  chrome.tabs.query({ active: true, currentWindow: true }, ([{ id }]) => {
@@ -9,5 +28,3 @@ chrome.runtime.onInstalled.addListener(() => {
 	  });
 	}, { url: [{ urlMatches: 'www.safeway.com' }] });
 });
-
-//chrome.runtime.getURL('index.html')

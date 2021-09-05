@@ -1,9 +1,9 @@
-<span [style.color]="color" 
-  [cpToggle]="true" 
-  [cpDialogDisplay]="'inline'" 
-  [cpPositionRelativeToArrow]="true"
-  [(colorPicker)]="color" 
-  [cpOKButtonText]="'Apply'" 
-  [cpOKButton]="true"
-  (colorPickerSelect)="colorize()">
-</span>
+<div>Scraped Products</div>
+<table>
+  <tr *ngFor="let product of Products">
+    <td>{{product.itemLabel}}</td>
+    <td>{{product.itemPrice}}</td>
+    <td>{{product.itemPricePer}}</td>
+    <td>{{product.itemPerUnit}}</td>
+  </tr>
+</table>

@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
+import { Product } from '../models/Product';
+import { DictEntry } from '../models/DictEntry';
 
 @Component({
   selector: 'app-root',
@@ -7,21 +9,40 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'chrome';
-  color = '#ffffff';
+  Products: Product[] = [];
+  constructor(private cd: ChangeDetectorRef) {}
   ngOnInit(): void {
-    chrome.storage.sync.get('color', ({ color }) => {
-      this.color = color;
+    let self = this;
+    chrome.runtime.onMessage.addListener(
+      function(request, sender, sendResponse) {
+        if(sender.tab)
+        {
+          if(sender.tab.url?.startsWith("https://www.safeway.com/shop/search-results.html"))
+          {
+            if (request.message === "initial_loading")
+            {
+                self.updatePage(request.g_itemLabels);
+            }
+          }
+        }
+        else
+        {
+          console.log(sender);
+        }
+      }
+    );
+    chrome.storage.sync.get('g_itemLabels', ({ g_itemLabels }) => {
+      this.updatePage({g_itemLabels});
     });
   }
-  public colorize() {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      chrome.tabs.executeScript(
-        tabs[0].id!,
-        { code: `document.body.style.backgroundColor = '${ this.color }';` }
-      );
-    });
-  }
-  public updateColor(color: string) {
-    chrome.storage.sync.set({ color });
+  public updatePage(g_itemLabels:any)
+  {
+    for (const key of Object.keys(g_itemLabels.table)) {
+      const obj = <DictEntry>g_itemLabels.table[key];
+      var p = new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit )
+      this.Products.push(p);
+    }
+    console.log(this.Products);
+    this.cd.detectChanges();
   }
 }

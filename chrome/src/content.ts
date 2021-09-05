@@ -1,10 +1,8 @@
 import * as Collections from 'typescript-collections';
 import { debounce } from 'ts-debounce';
+import { Product } from './models/Product';
 
-var g_itemLabel = new Collections.Set<string>();
-var g_itemPrice = new Collections.Set<number>();
-var g_itemPricePer = new Collections.Set<number>();
-var g_itemPerUnit = new Collections.Set<string>();
+var g_itemLabels = new Collections.Dictionary<string, Product>();
 
 let observer = new MutationObserver(mutations => {
     for(let mutation of mutations) {
@@ -26,18 +24,23 @@ let scrape = debounce((currentNode:Node) =>
 	while (node = results.iterateNext()) {
 		var itemLabelNode = getFirstOfElementsByXPath(node,'.//*[@data-qa="prd-itm-pttl"]');
 		var itemLabel = itemLabelNode.singleNodeValue?.textContent || "";
-		if(!g_itemLabel.contains(itemLabel)){
-			g_itemLabel.add(itemLabel.trim());
-			var itemPrice = getFirstOfElementsByXPath(node,'.//*[@data-qa="prd-itm-prc"]');
-			g_itemPrice.add(parseFloat(itemPrice.singleNodeValue?.textContent?.trim() || ""))
-			var itemPriceQuantity = getFirstOfElementsByXPath(node,'.//*[@class="product-price-qty"]');
-			var pricePerUnit = itemPriceQuantity.singleNodeValue?.textContent?.trim() || "";
-			var pricePerUnitArray = pricePerUnit.split("/")
-			g_itemPricePer.add(parseFloat(pricePerUnitArray[0]) || 0);
-			g_itemPerUnit.add(pricePerUnitArray[1]);
+		itemLabel = itemLabel.trim();
+		if(!g_itemLabels.containsKey(itemLabel)){
+			var itemPriceNode = getFirstOfElementsByXPath(node,'.//*[@data-qa="prd-itm-prc"]');
+			var itemPrice = parseFloat(itemPriceNode.singleNodeValue?.textContent?.trim() || "");
+			var itemPriceQuantityNode = getFirstOfElementsByXPath(node,'.//*[@class="product-price-qty"]');
+			var pricePerUnitNode = itemPriceQuantityNode.singleNodeValue?.textContent?.trim() || "";
+			var pricePerUnitArray = pricePerUnitNode.split("/")
+			var itemPricePer = parseFloat(pricePerUnitArray[0]) || 0;
+			var itemPerUnit = pricePerUnitArray[1];
+			g_itemLabels.setValue(itemLabel,new Product(itemLabel,itemPrice, itemPricePer, itemPerUnit));
 		}
 	};
-	console.log(g_itemLabel);
+	console.log("done crawling");
+	var obj = { message:"initial_loading", g_itemLabels }
+	chrome.runtime.sendMessage(obj, function(response) {
+		console.log(response.farewell);
+	});
 }
 ,1000);
 
@@ -48,4 +51,17 @@ function getListOfElementsByXPath(contextNode:Node, xpath:string):XPathResult {
 function getFirstOfElementsByXPath(contextNode:Node, xpath:string):XPathResult {
 	var result = document.evaluate(xpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 	return result;
+}
+
+// Avoid recursive frame insertion...
+var extensionOrigin = 'chrome-extension://' + chrome.runtime.id;
+if (!location.ancestorOrigins.contains(extensionOrigin)) {
+    var iframe = document.createElement('iframe');
+    // Must be declared at web_accessible_resources in manifest.json
+    iframe.src = chrome.runtime.getURL('index.html');
+
+    // Some styles for a fancy sidebar
+    iframe.style.cssText = 'background-color:white;position:fixed;top:0;right:0;display:block;' +
+                           'width:400px;height:100%;z-index:1000;';
+    document.body.appendChild(iframe);
 }
