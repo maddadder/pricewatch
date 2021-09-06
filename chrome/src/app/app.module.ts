@@ -4,10 +4,12 @@ import { ColorPickerModule } from 'ngx-color-picker';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { OrderByPipe } from './orderBy.pipe';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent, 
+    OrderByPipe
   ],
   imports: [
     BrowserModule,

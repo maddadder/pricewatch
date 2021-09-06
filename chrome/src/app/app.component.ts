@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { Product } from '../models/Product';
 
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -8,6 +9,8 @@ import { Product } from '../models/Product';
 })
 export class AppComponent {
   title = 'chrome';
+  orderbyProp = 'itemLabel';
+  sortOrderAsc = false;
   Products: Product[] = [];
   constructor(private cd: ChangeDetectorRef) {}
   ngOnInit(): void {
@@ -36,11 +39,35 @@ export class AppComponent {
   }
   public updatePage(g_itemLabels:any)
   {
+    if(!g_itemLabels)
+      return;
+    if(!g_itemLabels.table)
+      return;
     for (const key of Object.keys(g_itemLabels.table)) {
       const obj = g_itemLabels.table[key];
       var p = new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit )
       this.Products.push(p);
     }
     this.cd.detectChanges();
+  }
+  sort(column:string){
+    if(this.orderbyProp != column){
+      this.orderbyProp = column;
+    }
+    else
+    {
+      this.sortOrderAsc = !this.sortOrderAsc;
+    }
+    /*
+    if(column == "itemLabel"){
+      this.Products.sort((a,b) => a.itemLabel.localeCompare(b.itemLabel));
+    }
+    else if(column == "itemPrice"){
+      this.Products.sort((a, b) => (a.itemPrice < b.itemPrice ? -1 : 1));
+    }
+    else if(column == "itemPricePer"){
+      this.Products.sort((a, b) => (a.itemPricePer < b.itemPricePer ? -1 : 1));
+    }
+    */
   }
 }

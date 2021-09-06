@@ -1,9 +1,18 @@
 <div>Scraped Products</div>
-<table>
-  <tr *ngFor="let product of Products">
-    <td>{{product.itemLabel}}</td>
-    <td>{{product.itemPrice}}</td>
-    <td>{{product.itemPricePer}}</td>
-    <td>{{product.itemPerUnit}}</td>
-  </tr>
+<table class="table">
+  <thead>
+    <tr>
+      <th (click)="sort('itemLabel')" style="cursor: pointer;">label</th>
+      <th (click)="sort('itemPrice')" style="cursor: pointer;">price</th>
+      <th (click)="sort('itemPricePer')" style="cursor: pointer;">price/unit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!--<tr *ngFor="let product of Products | OrderByPipe: 'itemLabel': 'desc'">-->
+      <tr *ngFor="let product of Products | orderBy: orderbyProp: sortOrderAsc">
+      <td>{{product.itemLabel}}</td>
+      <td>{{product.itemPrice}}</td>
+      <td style="white-space: nowrap;">{{product.itemPricePer}}/{{product.itemPerUnit}}</td>
+    </tr>
+  </tbody>
 </table>

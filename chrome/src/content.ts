@@ -26,17 +26,21 @@ let scrape = debounce((currentNode:Node) =>
 		var itemLabel = itemLabelNode.singleNodeValue?.textContent || "";
 		itemLabel = itemLabel.trim();
 		if(!g_itemLabels.containsKey(itemLabel)){
+			console.log('scraping')
 			var itemPriceNode = getFirstOfElementsByXPath(node,'.//*[@data-qa="prd-itm-prc"]');
-			var itemPrice = parseFloat(itemPriceNode.singleNodeValue?.textContent?.trim() || "");
+			//console.log(itemPriceNode)
+			var itemPriceText = itemPriceNode.singleNodeValue?.textContent?.trim() || "";
+			var itemPrice = parseFloat(itemPriceText.replace(/[^0-9.]/g, ''));
 			var itemPriceQuantityNode = getFirstOfElementsByXPath(node,'.//*[@class="product-price-qty"]');
+			//console.log(itemPriceQuantityNode)
 			var pricePerUnitNode = itemPriceQuantityNode.singleNodeValue?.textContent?.trim() || "";
 			var pricePerUnitArray = pricePerUnitNode.split("/")
-			var itemPricePer = parseFloat(pricePerUnitArray[0]) || 0;
-			var itemPerUnit = pricePerUnitArray[1];
+			var itemPricePer = parseFloat(pricePerUnitArray[0].replace(/[^0-9.]/g, '')) || 0;
+			var itemPerUnit = pricePerUnitArray[1].replace(")","");
 			g_itemLabels.setValue(itemLabel,new Product(itemLabel,itemPrice, itemPricePer, itemPerUnit));
 		}
 	};
-	console.log("done crawling");
+	console.log("done scraping");
 	var obj = { message:"initial_loading", g_itemLabels }
 	chrome.runtime.sendMessage(obj, function(response) {
 		console.log(response.farewell);
