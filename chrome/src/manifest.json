@@ -20,7 +20,8 @@
     "content_scripts": [
         {
           "matches": [
-            "https://www.safeway.com/*"
+            "https://www.safeway.com/*",
+            "https://www.fredmeyer.com/*"
           ],
           "js": [
             "content.js",

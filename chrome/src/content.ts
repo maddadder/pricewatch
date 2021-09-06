@@ -1,6 +1,7 @@
 import * as Collections from 'typescript-collections';
 import { debounce } from 'ts-debounce';
 import { Product } from './models/Product';
+import { SafewayScraper } from './scrapers/SafewayScraper';
 
 var g_itemLabels = new Collections.Dictionary<string, Product>();
 
@@ -19,27 +20,9 @@ observer.observe(document, { childList: true, subtree: true });
 
 let scrape = debounce((currentNode:Node) => 
 { 
-	var results = getListOfElementsByXPath(currentNode,'.//product-item-v2');
-	var node = null;
-	while (node = results.iterateNext()) {
-		var itemLabelNode = getFirstOfElementsByXPath(node,'.//*[@data-qa="prd-itm-pttl"]');
-		var itemLabel = itemLabelNode.singleNodeValue?.textContent || "";
-		itemLabel = itemLabel.trim();
-		if(!g_itemLabels.containsKey(itemLabel)){
-			console.log('scraping')
-			var itemPriceNode = getFirstOfElementsByXPath(node,'.//*[@data-qa="prd-itm-prc"]');
-			//console.log(itemPriceNode)
-			var itemPriceText = itemPriceNode.singleNodeValue?.textContent?.trim() || "";
-			var itemPrice = parseFloat(itemPriceText.replace(/[^0-9.]/g, ''));
-			var itemPriceQuantityNode = getFirstOfElementsByXPath(node,'.//*[@class="product-price-qty"]');
-			//console.log(itemPriceQuantityNode)
-			var pricePerUnitNode = itemPriceQuantityNode.singleNodeValue?.textContent?.trim() || "";
-			var pricePerUnitArray = pricePerUnitNode.split("/")
-			var itemPricePer = parseFloat(pricePerUnitArray[0].replace(/[^0-9.]/g, '')) || 0;
-			var itemPerUnit = pricePerUnitArray[1].replace(")","");
-			g_itemLabels.setValue(itemLabel,new Product(itemLabel,itemPrice, itemPricePer, itemPerUnit));
-		}
-	};
+	let scraper = new SafewayScraper();
+	scraper.scrape(g_itemLabels, currentNode);
+	
 	console.log("done scraping");
 	var obj = { message:"initial_loading", g_itemLabels }
 	chrome.runtime.sendMessage(obj, function(response) {
@@ -48,14 +31,6 @@ let scrape = debounce((currentNode:Node) =>
 }
 ,1000);
 
-function getListOfElementsByXPath(contextNode:Node, xpath:string):XPathResult {
-	var result = document.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-	return result;
-}
-function getFirstOfElementsByXPath(contextNode:Node, xpath:string):XPathResult {
-	var result = document.evaluate(xpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-	return result;
-}
 
 // Avoid recursive frame insertion...
 var extensionOrigin = 'chrome-extension://' + chrome.runtime.id;

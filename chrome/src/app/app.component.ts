@@ -19,12 +19,8 @@ export class AppComponent {
       function(request, sender, sendResponse) {
         if(sender.tab)
         {
-          if(sender.tab.url?.startsWith("https://www.safeway.com/shop/search-results.html"))
-          {
-            if (request.message === "initial_loading")
-            {
-                self.updatePage(request.g_itemLabels);
-            }
+          if(self.IsUrlRelevant(request, sender.tab.url)){
+            self.updatePage(request.g_itemLabels);
           }
         }
         else
@@ -36,6 +32,24 @@ export class AppComponent {
     chrome.storage.sync.get('g_itemLabels', ({ g_itemLabels }) => {
       this.updatePage({g_itemLabels});
     });
+  }
+  public IsUrlRelevant(request:any, url?:string):boolean 
+  {
+    var safeUrls = [
+      'https://www.fredmeyer.com/search?query=',
+      "https://www.safeway.com/shop/search-results.html"]
+    var allowUrl = false;
+    for(var i = 0;i<safeUrls.length;i++){
+      var safeUrl = safeUrls[i];
+      if(url?.startsWith(safeUrl))
+      {
+        if (request.message === "initial_loading")
+        {
+            allowUrl = true;
+        }
+      }
+    }
+    return allowUrl;
   }
   public updatePage(g_itemLabels:any)
   {
@@ -55,21 +69,11 @@ export class AppComponent {
   sort(column:string){
     if(this.orderbyProp != column){
       this.orderbyProp = column;
+      this.sortOrderAsc = !this.sortOrderAsc;
     }
     else
     {
       this.sortOrderAsc = !this.sortOrderAsc;
     }
-    /*
-    if(column == "itemLabel"){
-      this.Products.sort((a,b) => a.itemLabel.localeCompare(b.itemLabel));
-    }
-    else if(column == "itemPrice"){
-      this.Products.sort((a, b) => (a.itemPrice < b.itemPrice ? -1 : 1));
-    }
-    else if(column == "itemPricePer"){
-      this.Products.sort((a, b) => (a.itemPricePer < b.itemPricePer ? -1 : 1));
-    }
-    */
   }
 }

@@ -26,5 +26,5 @@ chrome.runtime.onInstalled.addListener(() => {
 		  chrome.pageAction.show(id);
 		}
 	  });
-	}, { url: [{ urlMatches: 'www.safeway.com' }] });
+	}, { url: [{ urlMatches: 'www.safeway.com' }, { urlMatches: 'www.fredmeyer.com' }] });
 });
