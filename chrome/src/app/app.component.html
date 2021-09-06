@@ -8,8 +8,7 @@
     </tr>
   </thead>
   <tbody>
-    <!--<tr *ngFor="let product of Products | OrderByPipe: 'itemLabel': 'desc'">-->
-      <tr *ngFor="let product of Products | orderBy: orderbyProp: sortOrderAsc">
+      <tr *ngFor="let product of Products.values() | orderBy: orderbyProp: sortOrderAsc">
       <td>{{product.itemLabel}}</td>
       <td>{{product.itemPrice}}</td>
       <td style="white-space: nowrap;">{{product.itemPricePer}}/{{product.itemPerUnit}}</td>

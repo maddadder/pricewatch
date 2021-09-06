@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { Product } from '../models/Product';
-
+import * as Collections from 'typescript-collections';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +11,7 @@ export class AppComponent {
   title = 'chrome';
   orderbyProp = 'itemLabel';
   sortOrderAsc = false;
-  Products: Product[] = [];
+  Products: Collections.Dictionary<string, Product> = new Collections.Dictionary<string, Product>();
   constructor(private cd: ChangeDetectorRef) {}
   ngOnInit(): void {
     let self = this;
@@ -45,8 +45,10 @@ export class AppComponent {
       return;
     for (const key of Object.keys(g_itemLabels.table)) {
       const obj = g_itemLabels.table[key];
-      var p = new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit )
-      this.Products.push(p);
+      if(!this.Products.containsKey(obj.value.itemLabel))
+      {
+        this.Products.setValue(obj.value.itemLabel,new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit));
+      }
     }
     this.cd.detectChanges();
   }
