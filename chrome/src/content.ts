@@ -2,6 +2,7 @@ import * as Collections from 'typescript-collections';
 import { debounce } from 'ts-debounce';
 import { Product } from './models/Product';
 import { SafewayScraper } from './scrapers/SafewayScraper';
+import { FredMeyerScraper } from './scrapers/FredMeyerScraper';
 
 var g_itemLabels = new Collections.Dictionary<string, Product>();
 
@@ -19,10 +20,22 @@ observer.observe(document, { childList: true, subtree: true });
 //observer.disconnect();
 
 let scrape = debounce((currentNode:Node) => 
-{ 
-	let scraper = new SafewayScraper();
-	scraper.scrape(g_itemLabels, currentNode);
-	
+{
+	if(location.href.startsWith("https://www.safeway.com"))
+	{
+		console.log('scraping safeway.com')
+		let scraper = new SafewayScraper();
+		scraper.scrape(g_itemLabels, currentNode);
+	}
+	else if(location.href.startsWith("https://www.fredmeyer.com"))
+	{
+		console.log('scraping fredmeyer.com')
+		let scraper = new FredMeyerScraper();
+		scraper.scrape(g_itemLabels, currentNode);
+	}
+	else{
+		console.log(location.href);
+	}
 	console.log("done scraping");
 	var obj = { message:"initial_loading", g_itemLabels }
 	chrome.runtime.sendMessage(obj, function(response) {

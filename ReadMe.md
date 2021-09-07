@@ -1,6 +1,10 @@
-# PriceWatch
+# PriceWatch Safeway
 
-![alt text](https://github.com/maddadder/pricewatch/blob/master/Screenshot.png?raw=true)
+![alt text](https://github.com/maddadder/pricewatch/blob/master/Screenshot1.png?raw=true)
+
+# PriceWatch FredMeyer
+
+![alt text](https://github.com/maddadder/pricewatch/blob/master/Screenshot2.png?raw=true)
 
 ## Help Along the way
 

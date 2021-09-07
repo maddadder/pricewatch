@@ -11,7 +11,7 @@ export class AppComponent {
   title = 'chrome';
   orderbyProp = 'itemLabel';
   sortOrderAsc = false;
-  Products: Collections.Dictionary<string, Product> = new Collections.Dictionary<string, Product>();
+  Products: Product[] = [];
   constructor(private cd: ChangeDetectorRef) {}
   ngOnInit(): void {
     let self = this;
@@ -36,7 +36,7 @@ export class AppComponent {
   public IsUrlRelevant(request:any, url?:string):boolean 
   {
     var safeUrls = [
-      'https://www.fredmeyer.com/search?query=',
+      'https://www.fredmeyer.com/search',
       "https://www.safeway.com/shop/search-results.html"]
     var allowUrl = false;
     for(var i = 0;i<safeUrls.length;i++){
@@ -59,11 +59,12 @@ export class AppComponent {
       return;
     for (const key of Object.keys(g_itemLabels.table)) {
       const obj = g_itemLabels.table[key];
-      if(!this.Products.containsKey(obj.value.itemLabel))
+      if(!this.Products.some(e => e.itemLabel === obj.value.itemLabel))
       {
-        this.Products.setValue(obj.value.itemLabel,new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit));
+        this.Products.push(new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit));
       }
     }
+    console.log(this.Products);
     this.cd.detectChanges();
   }
   sort(column:string){

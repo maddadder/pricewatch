@@ -2,29 +2,45 @@ import { Product } from "../models/Product";
 import { AbstractScraper } from "./AbstractScraper";
 import * as Collections from 'typescript-collections';
 
-export class FredMeyer extends AbstractScraper {
+export class FredMeyerScraper extends AbstractScraper {
     constructor() { super(); }
 
     scrape(g_itemLabels:Collections.Dictionary<string, Product>, currentNode:Node) : void {
-        var results = this.getListOfElementsByXPath(currentNode,'.//product-item-v2');
+        const results = this.getListOfElementsByXPath(currentNode,'.//*[@class="AutoGrid-cell min-w-0"]');
         var node = null;
         while (node = results.iterateNext()) {
-            var itemLabelNode = this.getFirstOfElementsByXPath(node,'.//*[@data-qa="prd-itm-pttl"]');
-            var itemLabel = itemLabelNode.singleNodeValue?.textContent || "";
-            itemLabel = itemLabel.trim();
+            const itemLabelNode = this.getFirstOfElementsByXPath(node,'.//*[@data-qa="cart-page-item-description"]');
+            const itemLabel = itemLabelNode.singleNodeValue?.textContent?.trim() || "";
             if(!g_itemLabels.containsKey(itemLabel)){
                 console.log('scraping')
-                var itemPriceNode = this.getFirstOfElementsByXPath(node,'.//*[@data-qa="prd-itm-prc"]');
-                //console.log(itemPriceNode)
-                var itemPriceText = itemPriceNode.singleNodeValue?.textContent?.trim() || "";
-                var itemPrice = parseFloat(itemPriceText.replace(/[^0-9.]/g, ''));
-                var itemPriceQuantityNode = this.getFirstOfElementsByXPath(node,'.//*[@class="product-price-qty"]');
-                //console.log(itemPriceQuantityNode)
-                var pricePerUnitNode = itemPriceQuantityNode.singleNodeValue?.textContent?.trim() || "";
-                var pricePerUnitArray = pricePerUnitNode.split("/")
-                var itemPricePer = parseFloat(pricePerUnitArray[0].replace(/[^0-9.]/g, '')) || 0;
-                var itemPerUnit = pricePerUnitArray[1].replace(")","");
-                g_itemLabels.setValue(itemLabel,new Product(itemLabel,itemPrice, itemPricePer, itemPerUnit));
+                if(itemLabel.length)
+                {
+                    const itemPriceNode = this.getFirstOfElementsByXPath(node,'.//*[@data-qa="cart-page-item-unit-price"]');
+                    //console.log(itemPriceNode)
+                    const itemPriceText = itemPriceNode.singleNodeValue?.textContent?.trim() || "";
+                    const itemPrice = parseFloat(itemPriceText.replace(/[^0-9.]/g, ''));
+                    const ozCount = itemLabel.match(/[-/ ][0-9/.]{1,5} [ogzgalflqt ]{1,5}/g)
+                    var itemPerUnit = "";
+                    var itemPricePer = 0;
+
+                    //should only be one
+                    ozCount?.forEach(element => {
+                        itemPricePer = parseFloat(element.trim().replace(/[^0-9./]/g, '')) || 0;
+                        if(itemPricePer > 0 && itemPricePer < 1000){
+                            itemPricePer = itemPrice / itemPricePer;
+                        }
+                        itemPerUnit = element.trim().replace(/[0-9./]/g, '').trim()
+                        if(itemPerUnit == "gal"){
+                            itemPerUnit = "fl oz";
+                            itemPricePer = itemPricePer / 128;
+                        }
+                        else if(itemPerUnit == "qt"){
+                            itemPerUnit = "fl oz";
+                            itemPricePer = itemPricePer / 32;
+                        }
+                    });
+                    g_itemLabels.setValue(itemLabel,new Product(itemLabel,itemPrice, itemPricePer, itemPerUnit));
+                }
             }
         };
     }
