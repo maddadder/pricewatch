@@ -6,6 +6,9 @@
 
 ![alt text](https://github.com/maddadder/pricewatch/blob/master/Screenshot2.png?raw=true)
 
+# Download PriceWatch
+[Download](https://github.com/maddadder/pricewatch/blob/master/chrome/dist.zip)
+
 ## Help Along the way
 
 https://medium.com/angular-in-depth/chrome-extension-with-angular-why-and-how-778200b87575
