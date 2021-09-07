@@ -2,6 +2,7 @@
 <table class="table">
   <thead>
     <tr>
+      <th>img</th>
       <th (click)="sort('itemLabel')" style="cursor: pointer;">label</th>
       <th (click)="sort('itemPrice')" style="cursor: pointer;">price</th>
       <th (click)="sort('itemPricePer')" style="cursor: pointer;">price/unit</th>
@@ -9,9 +10,10 @@
   </thead>
   <tbody>
       <tr *ngFor="let product of Products | orderBy: orderbyProp: sortOrderAsc">
-      <td>{{product.itemLabel}}</td>
-      <td>{{product.itemPrice}}</td>
-      <td style="white-space: nowrap;">{{product.itemPricePer}}/{{product.itemPerUnit}}</td>
-    </tr>
-  </tbody>
-</table>
+        <td style="vertical-align: top;"><img width="75" [src]="product.itemImgUrl" /></td>
+        <td>{{product.itemLabel}}</td>
+        <td>{{product.itemPrice | currency}}</td>
+        <td style="white-space: nowrap;">{{product.itemPricePer | currency}}/{{product.itemPerUnit}}</td>
+      </tr>
+    </tbody>
+  </table>

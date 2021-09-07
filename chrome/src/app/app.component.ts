@@ -61,7 +61,7 @@ export class AppComponent {
       const obj = g_itemLabels.table[key];
       if(!this.Products.some(e => e.itemLabel === obj.value.itemLabel))
       {
-        this.Products.push(new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit));
+        this.Products.push(new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit, obj.value.itemImgUrl));
       }
     }
     console.log(this.Products);

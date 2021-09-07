@@ -25,7 +25,14 @@ let scrape = debounce((currentNode:Node) =>
 	{
 		console.log('scraping safeway.com')
 		let scraper = new SafewayScraper();
-		scraper.scrape(g_itemLabels, currentNode);
+		if(!scraper.scrape(g_itemLabels, currentNode))
+		{
+			//safeway takes awhile to load the images
+			setTimeout(function(){
+				scraper.scrape(g_itemLabels, currentNode)
+			},10000);
+		}
+		
 	}
 	else if(location.href.startsWith("https://www.fredmeyer.com"))
 	{

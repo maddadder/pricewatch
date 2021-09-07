@@ -5,7 +5,7 @@ import * as Collections from 'typescript-collections';
 export class FredMeyerScraper extends AbstractScraper {
     constructor() { super(); }
 
-    scrape(g_itemLabels:Collections.Dictionary<string, Product>, currentNode:Node) : void {
+    scrape(g_itemLabels:Collections.Dictionary<string, Product>, currentNode:Node) : boolean {
         const results = this.getListOfElementsByXPath(currentNode,'.//*[@class="AutoGrid-cell min-w-0"]');
         var node = null;
         while (node = results.iterateNext()) {
@@ -39,9 +39,13 @@ export class FredMeyerScraper extends AbstractScraper {
                             itemPricePer = itemPricePer / 32;
                         }
                     });
-                    g_itemLabels.setValue(itemLabel,new Product(itemLabel,itemPrice, itemPricePer, itemPerUnit));
+                    var itemImgNode = this.getFirstOfElementsByXPath(node,'.//*[@data-qa="cart-page-item-image-loaded"]/@src');
+                    var itemImgUrl = itemImgNode.singleNodeValue?.nodeValue?.trim();
+                    //console.log(itemImgUrl);
+                    g_itemLabels.setValue(itemLabel,new Product(itemLabel,itemPrice, itemPricePer, itemPerUnit, itemImgUrl));
                 }
             }
         };
+        return true;
     }
 }
