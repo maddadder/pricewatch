@@ -10,7 +10,7 @@ import * as Collections from 'typescript-collections';
 export class AppComponent {
   title = 'chrome';
   public show:boolean = true;
-  public toggleButtonName:any = 'Show';
+  public toggleButtonName:any = 'Hide';
   port?: chrome.runtime.Port;
   orderbyProp = 'itemLabel';
   sortOrderAsc = false;
@@ -26,7 +26,7 @@ export class AppComponent {
           {
             if(self.IsUrlRelevant(request, port.sender.tab.url)){
               self.port = port;
-              self.updatePage(request.g_itemLabels);
+              self.updatePage(request.store, request.g_itemLabels);
             }
           }
           else
@@ -54,12 +54,21 @@ export class AppComponent {
     }
     return allowUrl;
   }
-  public updatePage(g_itemLabels:any)
+  public updatePage(store:string, g_itemLabels:any)
   {
     if(!g_itemLabels)
       return;
     if(!g_itemLabels.table)
       return;
+    if(store != "fredmeyer"){
+      let localStorageProducts = localStorage.getItem(store + "_products");
+      if(localStorageProducts){
+        this.Products = <Product[]>JSON.parse(localStorageProducts);
+      }
+    }
+    else{
+      this.Products = [];
+    }
     for (const key of Object.keys(g_itemLabels.table)) {
       const obj = g_itemLabels.table[key];
       if(!this.Products.some(e => e.itemLabel === obj.value.itemLabel))
@@ -67,7 +76,10 @@ export class AppComponent {
         this.Products.push(new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit, obj.value.buttonLabel, obj.value.itemImgUrl));
       }
     }
-    console.log(this.Products);
+    if(store != "fredmeyer"){
+      localStorage.setItem(store + "_products", JSON.stringify(this.Products));
+    }
+    //console.log(this.Products);
     this.cd.detectChanges();
   }
   public addToCart(buttonLabel:string){

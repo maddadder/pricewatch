@@ -21,8 +21,10 @@ observer.observe(document, { childList: true, subtree: true });
 
 let scrape = debounce((currentNode:Node) => 
 {
+	var obj:any = { message:"initial_loading" }
 	if(location.href.startsWith("https://www.safeway.com"))
 	{
+		obj.store = "safeway";
 		console.log('scraping safeway.com')
 		let scraper = new SafewayScraper();
 		let attempt = 0;
@@ -50,6 +52,7 @@ let scrape = debounce((currentNode:Node) =>
 	}
 	else if(location.href.startsWith("https://www.fredmeyer.com"))
 	{
+		obj.store = "fredmeyer";
 		console.log('scraping fredmeyer.com')
 		let scraper = new FredMeyerScraper();
 		scraper.scrape(g_itemLabels, currentNode, 0);
@@ -58,9 +61,12 @@ let scrape = debounce((currentNode:Node) =>
 		console.log(location.href);
 	}
 	console.log("done scraping");
-	var obj = { message:"initial_loading", g_itemLabels }
+	obj.g_itemLabels = g_itemLabels;
 	var port = chrome.runtime.connect({name: "knockknock"});
 	port.postMessage(obj);
+	if(obj.store == "fredmeyer"){
+		g_itemLabels.clear();
+	}
 	port.onMessage.addListener(function(msg, port) {
 		if (msg.buttonLabel){
 			if(location.href.startsWith("https://www.safeway.com"))
