@@ -5,7 +5,7 @@ import * as Collections from 'typescript-collections';
 export class FredMeyerScraper extends AbstractScraper {
     constructor() { super(); }
 
-    scrape(g_itemLabels:Collections.Dictionary<string, Product>, currentNode:Node) : boolean {
+    scrape(g_itemLabels:Collections.Dictionary<string, Product>, currentNode:Node, attempt:number) : boolean {
         const results = this.getListOfElementsByXPath(currentNode,'.//*[@class="AutoGrid-cell min-w-0"]');
         var node = null;
         while (node = results.iterateNext()) {
@@ -39,13 +39,32 @@ export class FredMeyerScraper extends AbstractScraper {
                             itemPricePer = itemPricePer / 32;
                         }
                     });
-                    var itemImgNode = this.getFirstOfElementsByXPath(node,'.//*[@data-qa="cart-page-item-image-loaded"]/@src');
-                    var itemImgUrl = itemImgNode.singleNodeValue?.nodeValue?.trim();
+                    const itemImgNode = this.getFirstOfElementsByXPath(node,'.//*[@data-qa="cart-page-item-image-loaded"]/@src');
+                    const itemImgUrl = itemImgNode.singleNodeValue?.nodeValue?.trim();
                     //console.log(itemImgUrl);
-                    g_itemLabels.setValue(itemLabel,new Product(itemLabel,itemPrice, itemPricePer, itemPerUnit, itemImgUrl));
+                    const buttonLabelContainerNode = this.getFirstOfElementsByXPath(node,'.//*[@data-qa="cart-page-item-quantity-stepper"]');
+                    var buttonLabelText:string | undefined = "";
+                    buttonLabelContainerNode.singleNodeValue?.childNodes.forEach(element => {
+                        var labelCheck  = this.getAriaLabel(element);
+                        if(labelCheck)
+                            buttonLabelText = labelCheck;
+                    });
+                    g_itemLabels.setValue(itemLabel,new Product(itemLabel,itemPrice, itemPricePer, itemPerUnit, buttonLabelText, itemImgUrl));
                 }
             }
         };
         return true;
+    }
+    getAriaLabel(element:any):string | undefined{
+        if(element.localName == "button"){
+            return element.ariaLabel;
+        }
+        return undefined;
+    }
+    addToCart(label:string):void{
+        var btnContainer:NodeListOf<HTMLButtonElement> = document.querySelectorAll('[aria-label="' + label + '"]');
+        btnContainer.forEach(element => {
+            element.click();
+        });
     }
 }

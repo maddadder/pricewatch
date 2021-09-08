@@ -1,11 +1,17 @@
-<div>Scraped Products</div>
-<table class="table">
+<div style="width:auto">
+  <button (click)="toggle()" id="bt" style="float:right">
+    {{toggleButtonName}}
+  </button>
+</div>
+
+<table class="table" [hidden]="!show" style="clear:both">
   <thead>
     <tr>
       <th>img</th>
       <th (click)="sort('itemLabel')" style="cursor: pointer;">label</th>
       <th (click)="sort('itemPrice')" style="cursor: pointer;">price</th>
       <th (click)="sort('itemPricePer')" style="cursor: pointer;">price/unit</th>
+      <th>action</th>
     </tr>
   </thead>
   <tbody>
@@ -14,6 +20,7 @@
         <td>{{product.itemLabel}}</td>
         <td>{{product.itemPrice | currency}}</td>
         <td style="white-space: nowrap;">{{product.itemPricePer | currency}}/{{product.itemPerUnit}}</td>
+        <td><button (click)="addToCart(product.buttonLabel)">Add to Cart</button></td>
       </tr>
     </tbody>
   </table>

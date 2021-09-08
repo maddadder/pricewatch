@@ -9,28 +9,31 @@ import * as Collections from 'typescript-collections';
 })
 export class AppComponent {
   title = 'chrome';
+  public show:boolean = true;
+  public toggleButtonName:any = 'Show';
+  port?: chrome.runtime.Port;
   orderbyProp = 'itemLabel';
   sortOrderAsc = false;
   Products: Product[] = [];
   constructor(private cd: ChangeDetectorRef) {}
   ngOnInit(): void {
     let self = this;
-    chrome.runtime.onMessage.addListener(
-      function(request, sender, sendResponse) {
-        if(sender.tab)
-        {
-          if(self.IsUrlRelevant(request, sender.tab.url)){
-            self.updatePage(request.g_itemLabels);
+    chrome.runtime.onConnect.addListener(function(port)
+    {
+      port.onMessage.addListener(
+        function(request, port) {
+          if(port.sender?.tab)
+          {
+            if(self.IsUrlRelevant(request, port.sender.tab.url)){
+              self.port = port;
+              self.updatePage(request.g_itemLabels);
+            }
           }
-        }
-        else
-        {
-          console.log(sender);
-        }
-      }
-    );
-    chrome.storage.sync.get('g_itemLabels', ({ g_itemLabels }) => {
-      this.updatePage({g_itemLabels});
+          else
+          {
+            console.log(port.sender);
+          }
+        });
     });
   }
   public IsUrlRelevant(request:any, url?:string):boolean 
@@ -61,11 +64,16 @@ export class AppComponent {
       const obj = g_itemLabels.table[key];
       if(!this.Products.some(e => e.itemLabel === obj.value.itemLabel))
       {
-        this.Products.push(new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit, obj.value.itemImgUrl));
+        this.Products.push(new Product(obj.value.itemLabel, obj.value.itemPrice, obj.value.itemPricePer, obj.value.itemPerUnit, obj.value.buttonLabel, obj.value.itemImgUrl));
       }
     }
     console.log(this.Products);
     this.cd.detectChanges();
+  }
+  public addToCart(buttonLabel:string){
+    if(this.port){
+      this.port.postMessage({buttonLabel: buttonLabel});
+    }
   }
   sort(column:string){
     if(this.orderbyProp != column){
@@ -75,6 +83,23 @@ export class AppComponent {
     else
     {
       this.sortOrderAsc = !this.sortOrderAsc;
+    }
+  }
+  toggle() {
+    this.show = !this.show;
+
+    // CHANGE THE NAME OF THE BUTTON.
+    if(this.show){
+      this.toggleButtonName = "Hide";
+      if(this.port){
+        this.port.postMessage({hideCommand: "Hide"});
+      }
+    }
+    else{
+      this.toggleButtonName = "Show";
+      if(this.port){
+        this.port.postMessage({hideCommand: "Show"});
+      }
     }
   }
 }

@@ -8,7 +8,6 @@ chrome.runtime.onMessage.addListener(
 				if (request.message === "initial_loading")
 				{
 					console.log("background received initial_loading");
-					chrome.storage.sync.set({g_itemLabels:request.g_itemLabels});
 					sendResponse({farewell: "goodbye"});
 				}
 			}
@@ -21,10 +20,19 @@ chrome.runtime.onMessage.addListener(
 );
 chrome.runtime.onInstalled.addListener(() => {
 	chrome.webNavigation.onCompleted.addListener(() => {
-	  chrome.tabs.query({ active: true, currentWindow: true }, ([{ id }]) => {
-		if (id) {
-		  chrome.pageAction.show(id);
+	  chrome.tabs.query({ active: true, currentWindow: true }, (tab) => {
+		if (tab && tab.length) 
+		{
+			if(tab[0].id)
+			{
+				localStorage.setItem("tab_id", tab[0].id.toString() );
+		  		chrome.pageAction.show(tab[0].id);
+			}
 		}
 	  });
 	}, { url: [{ urlMatches: 'www.safeway.com' }, { urlMatches: 'www.fredmeyer.com' }] });
+});
+
+chrome.runtime.onConnect.addListener(function(port){
+	port.postMessage({greeting:"hello from background"});
 });

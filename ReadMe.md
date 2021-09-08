@@ -19,8 +19,6 @@ https://stackoverflow.com/questions/67565858/angular-12-css-optimization-inline-
 
 https://github.com/just-jeb/angular-builders/issues/341
 
-https://github.com/YannMjl/Ng-read-localJSON/blob/ng_pipe/src/app/shared/orderBy.pipe.ts
-
 
 ## Build
 

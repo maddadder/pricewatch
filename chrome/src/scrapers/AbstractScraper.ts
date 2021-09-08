@@ -4,8 +4,8 @@ import { Product } from "../models/Product";
 export abstract class AbstractScraper {
     constructor() { }
 
-    abstract scrape(g_itemLabels:Collections.Dictionary<string, Product>, currentNode:Node) : boolean;
-
+    abstract scrape(g_itemLabels:Collections.Dictionary<string, Product>, currentNode:Node, attempt:number) : boolean;
+	abstract addToCart(label:string):void;
     getListOfElementsByXPath(contextNode:Node, xpath:string):XPathResult {
 		var result = document.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 		return result;
